@@ -53,14 +53,21 @@ app.put("/todos/:id/markAsCompleted", async function (request, response) {
 app.delete("/todos/:id", async function (request, response) {
   console.log("We have to delete a Todo with ID: ", request.params.id);
   try {
-    // Delete the todo with the given index
-    await Todo.destroy({
-      where: { id: request.params.id },
-    });
-    // Check the database any todo with given id is present
-    const stillThere = await Todo.findByPk(request.params.id);
-    // if todo is present, deletion failed so return false else return true
-    const deleted = stillThere ? false : true;
+    // check if todo exists for given id
+    let deleted = false;
+    const todo = await Todo.findByPk(request.params.id);
+    if (todo) {
+      // Delete the todo with the given index
+      await Todo.destroy({
+        where: { id: request.params.id },
+      });
+      // Check the database any todo with given id is present
+      const stillThere = await Todo.findByPk(request.params.id);
+      // if todo is present, deletion failed so return false else return true
+      deleted = stillThere ? false : true;
+    } else {
+      deleted = false;
+    }
     return response.send(deleted);
   } catch (error) {
     console.log(error);
